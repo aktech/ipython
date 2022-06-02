@@ -591,8 +591,9 @@ class Inspector(Colorable):
         info = self.info(obj, oname=oname, info=info, detail_level=detail_level)
 
         _mime = {
-            'text/plain': [],
-            'text/html': '',
+            "text/plain": [],
+            "text/html": "",
+            "x-vendor/papyri": {"qualname": obj.__module__ + "." + obj.__qualname__},
         }
 
         def append_field(bundle, title:str, key:str, formatter=None):
