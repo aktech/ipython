@@ -590,10 +590,13 @@ class Inspector(Colorable):
 
         info = self.info(obj, oname=oname, info=info, detail_level=detail_level)
 
+        from papyri.utils import full_qual
+
         _mime = {
             "text/plain": [],
             "text/html": "",
-            "x-vendor/papyri": {"qualname": obj.__module__ + "." + obj.__qualname__},
+            # "x-vendor/papyri": {"qualname": obj.__module__ + "." + obj.__qualname__},
+            "x-vendor/papyri": {"qualname": full_qual(obj)},
         }
 
         def append_field(bundle, title:str, key:str, formatter=None):
