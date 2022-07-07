@@ -541,6 +541,15 @@ class CodeMagics(Magics):
         mvalue = Path(filename).read_text(encoding="utf-8")
         self.shell.user_ns[mname] = Macro(mvalue)
 
+    @line_magic
+    def papyri(self, parameter_s):
+        if parameter_s.strip().lower() in {"1", "on", "true"}:
+            self.shell.inspector._papyri_enabled = True
+        elif parameter_s.strip().lower() in {"0", "off", "false"}:
+            self.shell.inspector._papyri_enabled = False
+        else:
+            print("papyri mime is: ", self.shell.inspector._papyri_enabled)
+
     @skip_doctest
     @line_magic
     def edit(self, parameter_s='',last_call=['','']):

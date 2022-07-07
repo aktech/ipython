@@ -367,6 +367,7 @@ class Inspector(Colorable):
         self.format = self.parser.format
         self.str_detail_level = str_detail_level
         self.set_active_scheme(scheme)
+        self._papyri_enabled = True
 
     def _getdef(self,obj,oname='') -> Union[str,None]:
         """Return the call signature for any callable object.
@@ -590,16 +591,21 @@ class Inspector(Colorable):
 
         info = self.info(obj, oname=oname, info=info, detail_level=detail_level)
 
-        from papyri.utils import full_qual
-
         _mime = {
             "text/plain": [],
             "text/html": "",
-            # "x-vendor/papyri": {"qualname": obj.__module__ + "." + obj.__qualname__},
-            "x-vendor/papyri": {"qualname": full_qual(obj)},
         }
+        if self._papyri_enabled:
+            try:
+                from papyri.utils import full_qual
 
-        def append_field(bundle, title:str, key:str, formatter=None):
+                # "x-vendor/papyri": {"qualname": obj.__module__ + "." + obj.__qualname__},
+                _mime["x-vendor/papyri"] = {"qualname": full_qual(obj)}
+            except ModuleNotFoundError:
+                print("Could not import papyri")
+                pass
+
+        def append_field(bundle, title: str, key: str, formatter=None):
             if title in omit_sections or key in omit_sections:
                 return
             field = info[key]
@@ -664,7 +670,11 @@ class Inspector(Colorable):
             append_field(_mime, 'Call docstring', 'call_docstring', formatter)
 
 
-        return self.format_mime(_mime)
+        res = self.format_mime(_mime)
+
+        if self._papyri_enabled:
+            res["text/plain"] = ""
+        return res
 
     def pinfo(
         self,
