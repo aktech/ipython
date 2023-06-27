@@ -410,6 +410,7 @@ class Inspector(Colorable):
         self.format = self.parser.format
         self.str_detail_level = str_detail_level
         self.set_active_scheme(scheme)
+        self._papyri_enabled = True
 
     def _getdef(self,obj,oname='') -> Union[str,None]:
         """Return the call signature for any callable object.
@@ -655,6 +656,15 @@ class Inspector(Colorable):
             "text/plain": [],
             "text/html": [],
         }
+        if self._papyri_enabled:
+            try:
+                from papyri.utils import full_qual
+
+                # "x-vendor/papyri": {"qualname": obj.__module__ + "." + obj.__qualname__},
+                bundle["x-vendor/papyri"] = {"qualname": full_qual(obj)}
+            except ModuleNotFoundError:
+                print("Could not import papyri")
+                pass
 
         # A convenience function to simplify calls below
         def append_field(
@@ -799,7 +809,7 @@ class Inspector(Colorable):
         info_b: Bundle = self._get_info(
             obj, oname, formatter, info, detail_level, omit_sections=omit_sections
         )
-        if not enable_html_pager:
+        if not enable_html_pager and info_b.get("text/html"):
             del info_b["text/html"]
         page.page(info_b)
 
