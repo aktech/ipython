@@ -656,15 +656,6 @@ class Inspector(Colorable):
             "text/plain": [],
             "text/html": [],
         }
-        if self._papyri_enabled:
-            try:
-                from papyri.utils import full_qual
-
-                # "x-vendor/papyri": {"qualname": obj.__module__ + "." + obj.__qualname__},
-                bundle["x-vendor/papyri"] = {"qualname": full_qual(obj)}
-            except ModuleNotFoundError:
-                print("Could not import papyri")
-                pass
 
         # A convenience function to simplify calls below
         def append_field(
@@ -770,7 +761,20 @@ class Inspector(Colorable):
             detail_level=detail_level,
             omit_sections=omit_sections,
         )
-        return self.format_mime(bundle)
+        formatted = self.format_mime(bundle)
+
+        if self._papyri_enabled:
+            try:
+                from papyri.utils import full_qual
+
+                # "x-vendor/papyri": {"qualname": obj.__module__ + "." + obj.__qualname__},
+                formatted["x-vendor/papyri"] = {"qualname": full_qual(obj)}
+            except ModuleNotFoundError:
+                print("Could not import papyri")
+                pass
+        if self._papyri_enabled:
+            formatted["text/plain"] = ""
+        return formatted
 
     def pinfo(
         self,
